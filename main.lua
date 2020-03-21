@@ -1,6 +1,10 @@
 cvsw=320
 cvsh=200
 
+--gameplay variables
+initinfectionradius=10
+
+
 if love.system.getOS()=='Android' then
    ww,wh=love.window.getMode()
    ww=ww/dpiScl
@@ -76,31 +80,64 @@ py=100
 
 
 gos={
-	{x=100,y=100,dir='r'},
-	{x=150,y=150,dir='g'}
+	{x=100,y=100,dir='r',trail={ {x=100,y=100,strength=initinfectionradius} }},
+	{x=150,y=150,dir='g',trail={  }}
 }
 
+updateinfectiontrail = function(go)
+  for j,inf in ipairs(go.trail) 
+  do
+    inf.strength=inf.strength-1
+    if inf.strength==0
+    then
+      table.remove(go.trail,j)
+      
+    end
+  end
+  
+  table.insert(go.trail,{x=go.x,y=go.y,strength=initinfectionradius})
+  
+  
+end
 
 updategos= function()
-	   for i,go in ipairs(gos)
-	   do
+    
+  
+	for i,go in ipairs(gos)
+	do
 		if go.dir=='r' then go.x=go.x+1 end
 		if go.dir=='g' then go.x=go.x-1 end
 
 		if go.dir=='r' and go.x>cvsw  then go.dir='g' end
 		if go.dir=='g' and go.x<0  then go.dir='r' end
-	   end
+    
+    updateinfectiontrail(go)
+    
+	  end
 end
 
 
 love.draw=function()
  
  love.graphics.setCanvas(cvs)
+ love.graphics.clear()
+ 
+ love.graphics.setColor(1.0,0.0,0.0,0.5)
+ for i,go in ipairs(gos)
+ do
+   for j,inf in ipairs(go.trail)
+    do
+     love.graphics.circle('fill',inf.x,inf.y,inf.strength ) 
+    end
+  end
+ 
 love.graphics.setColor(1.0,0.0,0.0,1.0)
 
 for i,go in ipairs(gos)
 do
+
 	love.graphics.print('o',go.x,go.y)
+  
 end
 
 love.graphics.setColor(1.0,1.0,1.0,1.0)
@@ -122,6 +159,9 @@ love.mousepressed=function(x,y)
 end
 
 love.update=function()
+  
+  
+  
 	toapply=moves[1]
 	if toapply~=nil then
 	   px=px+toapply.dx
