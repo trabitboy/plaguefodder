@@ -8,16 +8,32 @@ cvsw=640
 cvsh=480
 
 health=100
+infectionStep=0.1
 
+mapDetectInhib=128
 
+  --wall
   rw=124/255
   gw=139/255
   bw=255/255
 
+
+  -- spawn point of player
+  rp=243/255
+  gp=0/255
+  bp=0/255
+
+
+  --exit
   re=0/255
   ge=243/255
   be=0/255
 
+  --infected person
+  ri=243/255
+  gi=243/255
+  bi=0/255
+  
 
 rooms={
   }
@@ -70,7 +86,7 @@ if love.system.getOS()=='Android' then
    wh=wh/dpiScl
  else
  
-	ww=854
+	ww=640
 	 wh=480
  	 love.window.setMode(ww,wh,{resizable=true})
  end
@@ -100,6 +116,89 @@ if love.system.getOS()=='Android' then
 moves={}
 --sqspeed=64
 sqspeed=256
+
+
+
+
+
+
+radColl=function(x1,y1,x2,y2,r)
+  sqr=r*r
+  sqw=(x1-x2)*(x1-x2)
+  sqh=(y1-y2)*(y1-y2)
+  if sqr>=(sqw+sqh) then
+    return true
+  end
+  
+  return false
+end
+
+
+--we check if there is a go in inhib distance
+goInInhib=function(lx,ly)
+  for i,go in ipairs(gos)
+  do
+    if radColl(go.x,go.y,lx,ly,mapDetectInhib) then
+      return true
+    end
+  end
+  
+  return false
+end
+
+--we scan image of current room 
+--yellow dot creates an infected go
+-- red dot 
+-- for dot detection, if other colored dot within inhib radius we dont take it
+initRoom=function()
+  nbInfected=0
+  gos={}
+  
+  plyPositioned=false
+  --go creation
+  for i=0,(cvsw-1)
+  do
+    for j=0,(cvsh-1)
+    do
+      local r,g,b,a=roomCollisionMap:getPixel(i,j)
+      
+      if r==ri and g==gi and b==bi then
+        --we have to check if no go was created for same colored spot
+        if goInInhib(i,j)==false then
+          --we can create an infected go !!!
+          local created={x=i,y=j,dir='g',trail={  }}
+          table.insert(gos,created)
+          nbInfected=nbInfected+1
+        end
+      elseif r==rp and g==gp and b==bp and plyPositioned==false then
+        px=i
+        py=j
+        plyPositioned=true
+      end
+    end
+  end
+  
+  print('nb infected created '..nbInfected)
+
+end
+
+
+--we see if player position is in infection radius of a go trail
+-- if yes we decrease health
+checkInfection=function()
+  for i,go in ipairs(gos)
+  do
+    for j,infection in ipairs(go.trail)
+    do
+--      {x=100,y=100,strength=initinfectionradius} 
+      if radColl(px,py,infection.x,infection.y,infection.strength) then
+        print('infection !')
+        health=health-infectionStep
+      end
+    end
+  end
+end
+
 
 function calculatetraj(tx,ty,ix,iy)
 	moves={}
@@ -134,15 +233,20 @@ function love.resize( nw, nh )
 	-- end
 end
 
-
+--managed by init room ( red detection )
 px = 100
 py=100
 
+--for stats and debug of load
+nbInfected=0
 
-gos={
-	{x=50,y=100,dir='r',trail={ {x=100,y=100,strength=initinfectionradius} }},
-	{x=200,y=150,dir='g',trail={  }}
-}
+--gos={
+--	{x=50,y=100,dir='r',trail={ {x=100,y=100,strength=initinfectionradius} }},
+--	{x=200,y=150,dir='g',trail={  }}
+--}
+
+initRoom()
+
 
 updateinfectiontrail = function(go)
   for j,inf in ipairs(go.trail) 
@@ -275,7 +379,7 @@ end
 
 love.update=function()
   
-  
+  checkInfection()
   
 	toapply=moves[1]
 	if toapply~=nil then
@@ -294,7 +398,7 @@ love.update=function()
       -- we check next level ( green ) here
       currentRoom=currentRoom+1
       setCurrentRoom(currentRoom)
-    
+      initRoom()
     else
       --otherwise we keep on moving
       px=tpx
