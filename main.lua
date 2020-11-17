@@ -81,6 +81,8 @@ initinfectionradius=10
 decreaserate=0.2
 
 if love.system.getOS()=='Android' then
+   dpiScl=love.window.getDPIScale()
+
    ww,wh=love.window.getMode()
    ww=ww/dpiScl
    wh=wh/dpiScl
