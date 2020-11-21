@@ -3,6 +3,11 @@
 --remove just a little bit , as collision will be continuous
 -- or check radius, but then no trail will be taken into account?
 
+--android bug : color analysis doesnt seem to work (wall is ignored, no baddie created ,
+--exit doesnt work,nor spawn point
+--gameplay variables
+initinfectionradius=10
+decreaserate=0.2
 
 cvsw=640
 cvsh=480
@@ -10,7 +15,7 @@ cvsh=480
 health=100
 infectionStep=0.1
 
-mapDetectInhib=128
+mapDetectInhib=64
 
   --wall
   rw=124/255
@@ -39,6 +44,18 @@ rooms={
   }
 
 loadRooms= function()
+  room1={}
+  room1.name='welcome'
+  room1.imageData=love.image.newImageData('003.png')
+  room1.pic=love.graphics.newImage(room1.imageData)
+  
+  table.insert(rooms,room1)
+  room1={}
+  room1.name='welcome'
+  room1.imageData=love.image.newImageData('004.png')
+  room1.pic=love.graphics.newImage(room1.imageData)
+  
+  table.insert(rooms,room1)
   
   room1={}
   room1.name='welcome'
@@ -76,9 +93,6 @@ setCurrentRoom(currentRoom)
 
 
 
---gameplay variables
-initinfectionradius=10
-decreaserate=0.2
 
 if love.system.getOS()=='Android' then
    dpiScl=love.window.getDPIScale()
