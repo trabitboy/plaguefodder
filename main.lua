@@ -3,6 +3,9 @@
 --remove just a little bit , as collision will be continuous
 -- or check radius, but then no trail will be taken into account?
 
+
+dbgmsg='dbg'
+
 --android bug : color analysis doesnt seem to work (wall is ignored, no baddie created ,
 --exit doesnt work,nor spawn point
 --gameplay variables
@@ -217,6 +220,10 @@ end
 
 
 function calculatetraj(tx,ty,ix,iy)
+  
+  
+  
+  
 	moves={}
 	squaredist=(tx-ix)*(tx-ix)+(ty-iy)*(ty-iy)
 	nbsteps=squaredist/sqspeed
@@ -352,7 +359,7 @@ do
 end
 
 love.graphics.setColor(1.0,1.0,1.0,1.0)
-love.graphics.print('plague')
+love.graphics.print('plague '..dbgmsg,0,100)
 
 
 
@@ -403,8 +410,10 @@ love.update=function()
 	  tpy=py+toapply.dy
      
      
---    local r,g,b,a=roomCollisionMap:getPixel(tpx,tpy)
-     
+    local r,g,b,a=roomCollisionMap:getPixel(tpx,tpy)
+    dbgmsg ='tpx '..tpx..' tpy '..tpy..' r '..(r*255)..' g '..(g*255)..' b '..(b*255)
+    
+    
 --    if a~=0 then
     if colorColl(tpx,tpy,rw,gw,bw) then
       --move not possible
