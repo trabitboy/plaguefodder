@@ -21,26 +21,26 @@ infectionStep=0.1
 mapDetectInhib=64
 
   --wall
-  rw=124/255
-  gw=139/255
-  bw=255/255
+  rw=124
+  gw=139
+  bw=255
 
 
   -- spawn point of player
-  rp=243/255
-  gp=0/255
-  bp=0/255
+  rp=243
+  gp=0
+  bp=0
 
 
   --exit
-  re=0/255
-  ge=243/255
-  be=0/255
+  re=0
+  ge=243
+  be=0
 
   --infected person
-  ri=243/255
-  gi=243/255
-  bi=0/255
+  ri=243
+  gi=243
+  bi=0
   
 
 rooms={
@@ -180,6 +180,12 @@ initRoom=function()
     for j=0,(cvsh-1)
     do
       local r,g,b,a=roomCollisionMap:getPixel(i,j)
+      
+      --in image data , range is 0 1, our color constants are 0 to 255
+      r=math.floor(r*255)
+      g=math.floor(g*255)
+      b=math.floor(b*255)
+      
       
       if r==ri and g==gi and b==bi then
         --we have to check if no go was created for same colored spot
@@ -387,6 +393,12 @@ end
 colorColl=function(tx,ty,rc,gc,bc)
   
   local r,g,b,a=roomCollisionMap:getPixel(tx,ty)
+
+
+  --in image data , range is 0 1, our color constants are 0 to 255
+  r=math.floor(r*255)
+  g=math.floor(g*255)
+  b=math.floor(b*255)
 
 --  rw=124/255
 --  gw=139/255
